@@ -52,9 +52,9 @@ class SQLiteConnection
       $pdo = new \PDO(SQLiteConnection::$connection_string);
       $query = "create table if not exists entry(
         day date primary key,
-        first varchar(4),
-        second varchar(4),
-        third varchar(4),
+        first varchar,
+        second varchar,
+        third varchar,
         starter varchar,
         consolation varchar
       );";
@@ -65,18 +65,20 @@ class SQLiteConnection
         results_per_page integer
       );";
       $pdo->query($config_query);
-      $pdo->query("INSERT INTO config VALUES (6,6,10)");
+      $pdo->query("INSERT INTO config VALUES (6,0,10)");
     } catch (Exception $e) {
       die($e);
     }
+    SQLiteConnection::seed();
   }
 
   public static function drop()
   {
     try {
       $pdo = new \PDO(SQLiteConnection::$connection_string);
-      $pdo->query("drop table entry;");
-      $pdo->query("drop table config;");
+      $pdo->query("DROP TABLE entry;");
+      $pdo->query("DROP TABLE config;");
+      $pdo->query("VACUUM;");
     } catch (Exception $e) {
       die($e);
     }
@@ -121,7 +123,7 @@ class SQLiteConnection
 
   protected static function get_rand_result()
   {
-    $digits = 4;
+    $digits = 6;
     return str_pad(rand(0, pow(10, $digits) - 1), $digits, '0', \STR_PAD_LEFT);
   }
 }

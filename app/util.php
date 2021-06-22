@@ -2,6 +2,7 @@
 
 namespace App\Functions;
 
+use App\Config;
 use DateTime;
 use DateTimeZone;
 
@@ -30,4 +31,19 @@ function get_valid_date(\PDO $pdo)
     $datelimit = $now;
   }
   return $datelimit;
+}
+
+function check_headers()
+{
+  $headers = getallheaders();
+  $headers = array_change_key_case($headers, CASE_UPPER);
+  if (!$headers || empty($headers['X-TOGEL-API-KEY']) || !in_array($headers["X-TOGEL-API-KEY"], Config::API_KEYS)) {
+    error($headers, 401);
+  }
+  return true;
+}
+
+function set_cache($time)
+{
+  header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + ($time)));
 }

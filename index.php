@@ -4,8 +4,11 @@ require 'vendor/autoload.php';
 
 use App\SQLiteConnection;
 use App\Entry;
+
+use function App\Functions\check_headers;
 use function App\Functions\error;
 use function App\Functions\response;
+use function App\Functions\set_cache;
 
 header("Access-Control-Allow-Origin: *");
 header("Accept: application/json");
@@ -13,7 +16,7 @@ header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Methods: OPTIONS,GET,PATCH,POST,PUT,DELETE");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Origin, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + (60 * 60)));
+
 
 $method = $_SERVER["REQUEST_METHOD"];
 
@@ -29,6 +32,7 @@ $request = explode('/', $_REQUEST["url"]);
 $result = "";
 switch ($request[0]) {
   case 'results':
+    set_cache(60 * 60);
     $entry = new Entry($pdo);
     switch ($method) {
       case 'GET':
@@ -47,13 +51,28 @@ switch ($request[0]) {
         response($result);
         break;
       case 'POST':
-        response("post requested");
+        check_headers();
+        $json_input = json_decode(file_get_contents("php://input"), true);
+        response($json_input, 201);
         break;
       default:
         error("Method not allowed", 405);
     }
     break;
+  case 'live-draw':
+    set_cache(60 * 60 * 24);
+    try {
+      $config = $pdo->query("SELECT * FROM config LIMIT 1;")->fetchAll()[0];
+      $time = str_pad($config["drawHour"], 2, "0", STR_PAD_LEFT) . ":" . str_pad($config["drawMinute"], 2, "0", STR_PAD_LEFT);
+    } catch (Exception $e) {
+      $time = "06:00";
+    }
+    response(array(
+      "livedraw" => $time
+    ));
+    break;
   case 'latest':
+    set_cache(0);
     $entry = new Entry($pdo);
     if ($method == "GET") {
       $result = $entry->get_latests_result();
@@ -64,6 +83,7 @@ switch ($request[0]) {
     }
     break;
   case '7370736e6b40676974687562':
+    check_headers();
     if ($method == "POST") {
       $json = file_get_contents('php://input');
       $data = json_decode($json);
@@ -81,9 +101,7 @@ switch ($request[0]) {
           response("Seed succesfull");
           break;
         case 'test':
-          $result = $pdo->query("DROP TABLE entry;");
-          $result = $pdo->query("DROP TABLE config;");
-          $result = $pdo->query("VACUUM;");
+          $result = "Testing";
           response($result);
           break;
         default:
