@@ -1,0 +1,11 @@
+RewriteEngine On
+RewriteBase /api/
+
+RedirectMatch 404 /\..*$
+RedirectMatch 404 /db/?.*$
+RedirectMatch 404 /app/?.*$
+RedirectMatch 404 /vendor/?.*$
+
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ([^\.\?]+)\??.*$ index.php?url=$1 [L]

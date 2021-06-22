@@ -1,0 +1,16 @@
+{
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/"
+    },
+    "files": [
+      "app/util.php"
+    ]
+  },
+  "scripts": {
+    "post-install-cmd": "App\\SQLiteConnection::setup"
+  },
+  "require": {
+    "php": "^8.0"
+  }
+}
