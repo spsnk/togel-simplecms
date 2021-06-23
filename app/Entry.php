@@ -8,6 +8,7 @@ use Exception;
 
 use function App\Functions\error;
 use function App\Functions\get_valid_date;
+use function App\Functions\parse_date;
 
 class Entry
 {
@@ -18,27 +19,21 @@ class Entry
     $this->db = $db;
   }
 
-
-  public function get_result(String $result_id)
+  public function get_result(string $result_id)
   {
-    try {
-      $date = new DateTime($result_id);
-    } catch (Exception $e) {
-      $result = null;
-      error("Invalid Date");
-    }
-    $query = "SELECT * FROM entry WHERE day = ? LIMIT 1;";
+    $date = parse_date($result_id);
+    $query = 'SELECT * FROM entry WHERE day = ? LIMIT 1;';
     try {
       $stmt = $this->db->prepare($query);
-      $stmt->execute(array($date->format('Y-m-d')));
+      $stmt->execute([$date->format('Y-m-d')]);
       $result = $stmt->fetchAll();
       if (empty($result)) {
-        error("Not found", 404);
+        error('Not found', 404);
       } else {
         $result = $result[0];
       }
     } catch (\PDOException $e) {
-      error("Database error", 500);
+      error('Database error', 500);
     }
     return $result;
   }
@@ -48,10 +43,11 @@ class Entry
     $datelimit = get_valid_date($this->db);
     $per_page = 10;
     $offset = ($page - 1) * $per_page;
-    $query = "SELECT * FROM entry WHERE day <= ? ORDER BY day DESC LIMIT ? OFFSET ?";
+    $query =
+      'SELECT * FROM entry WHERE day <= ? ORDER BY day DESC LIMIT ? OFFSET ?';
     try {
       $stmt = $this->db->prepare($query);
-      $stmt->execute(array($datelimit->format('Y-m-d'), $per_page, $offset));
+      $stmt->execute([$datelimit->format('Y-m-d'), $per_page, $offset]);
       $result = $stmt->fetchAll();
     } catch (\PDOException $e) {
       $result = null;
@@ -62,10 +58,10 @@ class Entry
   public function get_latests_result()
   {
     $datelimit = get_valid_date($this->db);
-    $query = "SELECT * FROM entry WHERE day <= ? ORDER BY day DESC LIMIT 1";
+    $query = 'SELECT * FROM entry WHERE day <= ? ORDER BY day DESC LIMIT 1';
     try {
       $stmt = $this->db->prepare($query);
-      $stmt->execute(array($datelimit->format('Y-m-d')));
+      $stmt->execute([$datelimit->format('Y-m-d')]);
       $result = $stmt->fetchAll()[0];
     } catch (\PDOException $e) {
       $result = null;
@@ -75,48 +71,71 @@ class Entry
 
   public function add_entry(array $input)
   {
-    $statement = "INSERT INTO entry
-      (number, timestamp)
-      VALUES (:number, :timestamp);";
+    $fields = ['day', 'first', 'second', 'third', 'starter', 'consolation'];
+    foreach ($fields as $field) {
+      if (!array_key_exists($field, $input)) {
+        error('Missing field [' . $field . ']');
+      }
+    }
+    $input['day'] = parse_date($input['day'])->format('Y-m-d');
+    $statement =
+      'INSERT INTO entry VALUES (:day, :first, :second, :third, :starter, :consolation)';
     try {
       $stmt = $this->db->prepare($statement);
-      $stmt->execute(
-        array(
-          'number' => $input['number'],
-          'timestamp' => $input['timestamp']
-        )
-      );
-      return $stmt->rowCount();
+      $stmt->execute($input);
+      return $input;
     } catch (\PDOException $e) {
-      exit(json_encode(array(
-        "message" => $e->getMessage(),
-        "error" => $e
-      )));
+      if ($e->errorInfo[0] == 23000) {
+        error('Conflict', 409);
+      }
+      error($e->getMessage(), 500);
     }
   }
 
-  public function update_entry($id, array $input)
+  public function delete_entry(string $input)
   {
-    $statement = "UPDATE entry
-      SET 
-        number = :number,
-        timestamp =:timestamp
-      WHERE id = :id;";
+    if (empty($input)) {
+      error('Bad Request');
+    }
+    $parsed_date = parse_date($input);
+    $statement = 'DELETE FROM entry WHERE day = ?';
     try {
       $stmt = $this->db->prepare($statement);
-      $stmt->execute(
-        array(
-          'id' => (int) $id,
-          'number' => $input['number'],
-          'timestamp' => $input['timestamp']
-        )
-      );
+      return $stmt->execute([$parsed_date->format('Y-m-d')]);
+    } catch (\PDOException $e) {
+      error($e->getMessage(), 500);
+    }
+  }
+
+  public function update_entry(string $id, array $input)
+  {
+    if (empty($id)) {
+      error('Bad Request');
+    }
+    $fields = ['first', 'second', 'third', 'starter', 'consolation'];
+    foreach ($fields as $field) {
+      if (!array_key_exists($field, $input)) {
+        error('Missing field [' . $field . ']');
+      }
+    }
+    $input['day'] = parse_date($id)->format('Y-m-d');
+    $statement = "UPDATE entry
+      SET 
+        first =:first,
+        second = :second,
+        third = :third,
+        starter = :starter,
+        consolation = :consolation
+      WHERE day = :day;";
+    try {
+      $stmt = $this->db->prepare($statement);
+      $stmt->execute($input);
+      if ($stmt->rowCount() < 1) {
+        error('No item affected');
+      }
       return $stmt->rowCount();
     } catch (\PDOException $e) {
-      exit(json_encode(array(
-        "message" => $e->getMessage(),
-        "error" => $e
-      )));
+      error($e->getMessage(), 500);
     }
   }
 }

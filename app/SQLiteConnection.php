@@ -14,10 +14,10 @@ class SQLiteConnection
 {
   /**
    * PDO instance
-   * @var type 
+   * @var type
    */
   private $pdo;
-  protected static $connection_string = "sqlite:" . Config::PATH_TO_SQLITE_FILE;
+  protected static $connection_string = 'sqlite:' . Config::PATH_TO_SQLITE_FILE;
   /**
    * return in instance of the PDO object that connects to the SQLite database
    * @return \PDO
@@ -28,20 +28,17 @@ class SQLiteConnection
     try {
       if ($this->pdo == null) {
         $this->pdo = new \PDO(SQLiteConnection::$connection_string);
-        $this->pdo->setAttribute(
-          \PDO::ATTR_ERRMODE,
-          \PDO::ERRMODE_EXCEPTION
-        );
+        $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $this->pdo->setAttribute(
           \PDO::ATTR_DEFAULT_FETCH_MODE,
-          \PDO::FETCH_ASSOC
+          \PDO::FETCH_ASSOC,
         );
       }
     } catch (\PDOException $e) {
-      die("Cannot connect to database");
+      die('Cannot connect to database');
     }
     if ($this->pdo == null) {
-      die("Cannot connect to database");
+      die('Cannot connect to database');
     }
     return $this->pdo;
   }
@@ -51,21 +48,21 @@ class SQLiteConnection
     try {
       $pdo = new \PDO(SQLiteConnection::$connection_string);
       $query = "create table if not exists entry(
-        day date primary key,
-        first varchar,
-        second varchar,
-        third varchar,
-        starter varchar,
-        consolation varchar
-      );";
+                day date primary key,
+                first varchar,
+                second varchar,
+                third varchar,
+                starter varchar,
+                consolation varchar
+            );";
       $pdo->query($query);
       $config_query = "create table if not exists config(
-        drawHour integer,
-        drawMinute integer,
-        results_per_page integer
-      );";
+                drawHour integer,
+                drawMinute integer,
+                results_per_page integer
+            );";
       $pdo->query($config_query);
-      $pdo->query("INSERT INTO config VALUES (6,0,10)");
+      $pdo->query('INSERT INTO config VALUES (6,0,10)');
     } catch (Exception $e) {
       die($e);
     }
@@ -76,9 +73,9 @@ class SQLiteConnection
   {
     try {
       $pdo = new \PDO(SQLiteConnection::$connection_string);
-      $pdo->query("DROP TABLE entry;");
-      $pdo->query("DROP TABLE config;");
-      $pdo->query("VACUUM;");
+      $pdo->query('DROP TABLE entry;');
+      $pdo->query('DROP TABLE config;');
+      $pdo->query('VACUUM;');
     } catch (Exception $e) {
       die($e);
     }
@@ -90,19 +87,19 @@ class SQLiteConnection
       $pdo = new \PDO(SQLiteConnection::$connection_string);
       $now = new DateTime('now');
       $origin = (new DateTime('now'))->modify('-2 years');
-      $stmt = $pdo->prepare("INSERT INTO entry VALUES (:date, :first, :second, :third, :starter, :consolation)");
-      for ($i = $origin; $i < $now; $i->modify("+1 day")) {
+      $stmt = $pdo->prepare(
+        'INSERT INTO entry VALUES (:day, :first, :second, :third, :starter, :consolation);',
+      );
+      for ($i = $origin; $i < $now; $i->modify('+1 day')) {
         try {
-          $stmt->execute(
-            array(
-              "date" => $i->format("Y-m-d"),
-              "first" => SQLiteConnection::get_rand_result(),
-              "second" => SQLiteConnection::get_rand_result(),
-              "third" => SQLiteConnection::get_rand_result(),
-              "starter" => SQLiteConnection::get_n_results(10),
-              "consolation" => SQLiteConnection::get_n_results(10)
-            )
-          );
+          $stmt->execute([
+            'day' => $i->format('Y-m-d'),
+            'first' => SQLiteConnection::get_rand_result(),
+            'second' => SQLiteConnection::get_rand_result(),
+            'third' => SQLiteConnection::get_rand_result(),
+            'starter' => SQLiteConnection::get_n_results(10),
+            'consolation' => SQLiteConnection::get_n_results(10),
+          ]);
         } catch (\PDOException $e) {
           \error_log($e);
         }
@@ -118,7 +115,7 @@ class SQLiteConnection
     for ($j = 0; $j < $n; $j++) {
       $thing[] = SQLiteConnection::get_rand_result();
     }
-    return \implode(",", $thing);
+    return \implode(',', $thing);
   }
 
   protected static function get_rand_result()
