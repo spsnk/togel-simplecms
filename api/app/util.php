@@ -18,7 +18,7 @@ function response($payload, $code = 200)
   if ($code == 204) {
     exit();
   }
-  exit(json_encode(['data' => $payload]));
+  exit(json_encode($payload));
 }
 
 function get_valid_date(\PDO $pdo)
@@ -45,14 +45,14 @@ function check_headers()
     empty($headers['X-TOGEL-API-KEY']) ||
     !in_array($headers['X-TOGEL-API-KEY'], Config::API_KEYS)
   ) {
-    error($headers, 401);
+    error("Not authorized", 401);
   }
   return true;
 }
 
 function set_cache($time)
 {
-  header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + $time));
+  header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', $time));
 }
 
 function parse_date(string $input)

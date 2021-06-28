@@ -16,7 +16,7 @@ header('Content-Type: application/json; charset=UTF-8');
 header('Access-Control-Allow-Methods: OPTIONS,GET,PATCH,POST,PUT,DELETE');
 header('Access-Control-Max-Age: 3600');
 header(
-  'Access-Control-Allow-Headers: Origin, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With',
+  'Access-Control-Allow-Headers: Origin, Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, X-Togel-Api-Key',
 );
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -28,12 +28,14 @@ if ($method == 'OPTIONS') {
 }
 
 $pdo = (new SQLiteConnection())->connect();
-
+if (empty($_REQUEST['url'])) {
+  error("Bad Request");
+}
 $request = explode('/', $_REQUEST['url']);
 $result = '';
 switch ($request[0]) {
   case 'results':
-    set_cache(60 * 60);
+    set_cache(time() + 60 * 60);
     $entry = new Entry($pdo);
     switch ($method) {
       case 'GET':
@@ -43,6 +45,9 @@ switch ($request[0]) {
               error('Invalid page');
             }
             $result = $entry->get_results($request[2]);
+          } else if ($request[1] == "upcoming") {
+            check_headers();
+            $result = $entry->get_upcoming_results();
           } else {
             $result = $entry->get_result($request[1]);
           }
@@ -80,7 +85,6 @@ switch ($request[0]) {
     break;
   case 'livedraw':
     if ($method == 'GET') {
-      set_cache(60 * 60 * 23);
       $now = new DateTime("now", new DateTimeZone("+0700"));
       $time = new DateTime("now", new DateTimeZone("+0700"));
       try {
@@ -89,18 +93,56 @@ switch ($request[0]) {
       } catch (Exception $e) {
         $time->setTime(0, 0);
       }
-      if ($now < $time) {
+      if ($time < $now) {
         $time->modify("+1 day");
       }
-      response([
+      set_cache($time->getTimestamp());
+      response(array("data" => array(
         'next' => $time->format(DateTime::ISO8601),
-      ]);
+      )));
+    } else {
+      error('Method not allowed', 405);
+    }
+    break;
+  case 'config':
+    check_headers();
+    if ($method == 'PUT') {
+      $input = json_decode(file_get_contents('php://input'), true);
+      if (array_key_exists("hour", $input) && array_key_exists("minutes", $input)) {
+        $query = "UPDATE config 
+        SET 
+          drawHour = :hour,
+          drawMinute = :minutes
+        ;
+        ";
+        try {
+          $stmt = $pdo->prepare($query);
+          $stmt->execute($input);
+          response("", 204);
+        } catch (\PDOException $e) {
+          error('Server error', 500);
+        }
+      } else {
+        error('Bad request');
+      }
+    } else if ($method == "GET") {
+      try {
+        $config = $pdo->query('SELECT * FROM config LIMIT 1;')->fetchAll()[0];
+      } catch (Exception $e) {
+        error('Server error', 500);
+      }
+      response(array(
+        "data" => array(
+          "hour" => $config['drawHour'],
+          "minutes" => $config['drawMinute']
+        )
+      ));
     } else {
       error('Method not allowed', 405);
     }
     break;
   case 'latest':
-    set_cache(0);
+    set_cache(time());
     $entry = new Entry($pdo);
     if ($method == 'GET') {
       $result = $entry->get_latests_result();
