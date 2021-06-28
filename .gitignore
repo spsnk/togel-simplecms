@@ -1,4 +1,2 @@
-vendor/
 .vscode/
-*.db
 node_modules/

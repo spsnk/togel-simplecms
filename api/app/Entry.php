@@ -60,7 +60,7 @@ class Entry
       $result = null;
       $total = 0;
     }
-    return array("data" => $result, "recordsTotal" => $total);
+    return array("data" => $result, "recordsTotal" => intval($total), "pageSize" => $per_page);
   }
 
 
@@ -81,7 +81,6 @@ class Entry
       }
     } catch (\PDOException $e) {
       $result = null;
-      $total = 0;
     }
     return array("data" => $result);
   }
