@@ -1,0 +1,73 @@
+// Import Custom SB Admin 2 Variables (Overrides Default Bootstrap Variables)
+@import 'variables.scss';
+
+// Import Bootstrap
+@import '../vendor/bootstrap/scss/bootstrap.scss';
+
+// Import Custom SB Admin 2 Mixins and Components
+@import 'mixins.scss';
+@import 'global.scss';
+@import 'utilities.scss';
+
+// Custom Components
+@import 'dropdowns.scss';
+@import 'navs.scss';
+@import 'buttons.scss';
+@import 'cards.scss';
+@import 'charts.scss';
+@import 'login.scss';
+@import 'error.scss';
+@import 'footer.scss';
+
+.number {
+  display: inline-flex;
+  width: 1.7rem;
+  height: 1.7rem;
+  margin: 0 0.125rem;
+  border-radius: 50%;
+  border: 1px solid gray;
+  justify-content: center;
+}
+
+.form-row-spacing {
+  .form-group {
+    margin-right: auto;
+    margin-left: auto;
+  }
+}
+
+.small-inputs {
+  input {
+    max-width: 5.5rem;
+  }
+}
+// .expand-data {
+//   // width: 10rem;
+// }
+
+#ui-datepicker-div {
+  z-index: 3 !important;
+}
+
+.border-row {
+  margin-top: 1rem;
+  margin-bottom: 2rem;
+  .form-row:first-child {
+    margin-left: -0.75rem;
+    margin-top: -1.2rem;
+  }
+  .col.form-group {
+    flex-basis: 20% !important;
+  }
+  input {
+    text-align: center;
+    padding-right: 0.2rem;
+    padding-left: 0.2rem;
+    width: 5rem;
+    margin: 0 auto;
+  }
+}
+
+html {
+  overflow-y: scroll;
+}
