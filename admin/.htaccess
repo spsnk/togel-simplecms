@@ -1,0 +1,4 @@
+AuthName "Administration Panel"
+AuthType Basic
+AuthUserFile /home/pridosandbox/public_html/simplecms/admin/.htpasswd
+Require valid-user
