@@ -2,3 +2,7 @@ AuthName "Administration Panel"
 AuthType Basic
 AuthUserFile /home/pridosandbox/public_html/simplecms/admin/.htpasswd
 Require valid-user
+
+
+RedirectMatch 404 /vendor/?.*$
+RedirectMatch 404 /node_modules/?.*$
