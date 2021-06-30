@@ -172,7 +172,7 @@
         render: (data) =>
           `<a data-toggle="tooltip" data-placement="right" title="Local time: ${new Date(
             data
-          ).toDateString()}">${data}</a>`,
+          ).toDateString()}">${data.split("T")[0]}</a>`,
       },
       { data: "first", render: (data) => `<strong>${data}</strong>` },
       { data: "second", render: (data) => `<small>${data}</small>` },
@@ -195,7 +195,7 @@
         render: (data) =>
           `<a data-toggle="tooltip" data-placement="right" title="Local time: ${new Date(
             data
-          ).toDateString()}">${data}</a>`,
+          ).toDateString()}">${data.split("T")[0]}</a>`,
       },
       { data: "first", render: (data) => `<strong>${data}</strong>` },
       { data: "second", render: (data) => `<small>${data}</small>` },

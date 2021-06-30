@@ -1,6 +1,6 @@
 AuthName "Administration Panel"
 AuthType Basic
-AuthUserFile /home/pridosandbox/public_html/simplecms/admin/.htpasswd
+AuthUserFile /home/pridosandbox/public_html/swedenlottery/admin/.htpasswd
 Require valid-user
 
 
