@@ -52,7 +52,10 @@ class Entry
       $stmt->execute([$datelimit->format('Y-m-d'), $per_page, $offset]);
       $result = $stmt->fetchAll();
       $total = $this->db->query("SELECT COUNT(day) as total FROM entry;")->fetch()["total"];
+      $timezone = new DateTimeZone('+0700');
       for ($i = 0; $i < count($result); $i++) {
+        $day = new DateTime($result[$i]["day"], $timezone);
+        $result[$i]["day"] = $day->format(DateTime::ISO8601);
         $result[$i]["starter"] = explode(",", $result[$i]["starter"]);
         $result[$i]["consolation"] = explode(",", $result[$i]["consolation"]);
       }
@@ -75,7 +78,10 @@ class Entry
       $stmt = $this->db->prepare($query);
       $stmt->execute([$datelimit->format('Y-m-d'), $per_page, $offset]);
       $result = $stmt->fetchAll();
+      $timezone = new DateTimeZone('+0700');
       for ($i = 0; $i < count($result); $i++) {
+        $day = new DateTime($result[$i]["day"], $timezone);
+        $result[$i]["day"] = $day->format(DateTime::ISO8601);
         $result[$i]["starter"] = explode(",", $result[$i]["starter"]);
         $result[$i]["consolation"] = explode(",", $result[$i]["consolation"]);
       }
@@ -95,6 +101,9 @@ class Entry
       $result = $stmt->fetchAll();
       if (!empty($result)) {
         $result = $result[0];
+        $timezone = new DateTimeZone('+0700');
+        $day = new DateTime($result["day"], $timezone);
+        $result["day"] = $day->format(DateTime::ISO8601);
         $result["starter"] = explode(",", $result["starter"]);
         $result["consolation"] = explode(",", $result["consolation"]);
       }
@@ -116,6 +125,9 @@ class Entry
       $result = $stmt->fetchAll();
       if (!empty($result)) {
         $result = $result[0];
+        $timezone = new DateTimeZone('+0700');
+        $day = new DateTime($result["day"], $timezone);
+        $result["day"] = $day->format(DateTime::ISO8601);
         $result["starter"] = explode(",", $result["starter"]);
         $result["consolation"] = explode(",", $result["consolation"]);
       }
