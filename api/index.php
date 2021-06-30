@@ -45,6 +45,10 @@ switch ($request[0]) {
               error('Invalid page');
             }
             $result = $entry->get_results($request[2]);
+          } else if ($request[1] == "yesterday") {
+            $result = $entry->get_yesterday_result();
+          } else if ($request[1] == "latest") {
+            $result = $entry->get_latests_result();
           } else if ($request[1] == "upcoming") {
             check_headers();
             $result = $entry->get_upcoming_results();

@@ -1,5 +1,5 @@
 (function ($) {
-  "use strict"; // Start of use strict
+  ("use strict"); // Start of use strict
   // Toggle the side navigation
   $("#sidebarToggle, #sidebarToggleTop").on("click", function (e) {
     $("body").toggleClass("sidebar-toggled");
@@ -96,7 +96,8 @@
   };
 
   let live_draw_timer = null;
-  const API_URL = "../api";
+  const API_URL = "https://pridosandbox.com/api";
+  // const API_URL = "../api";
   const load_data = (cache = true) => {
     let cache_string = "";
     if (cache) {
@@ -160,6 +161,7 @@
       });
     table.ajax.reload();
     upcoming_table.ajax.reload();
+    $('[data-toggle="tooltip"]').tooltip();
   };
   var table = $("#latest-results").DataTable({
     ajax: { url: API_URL + "/results/pages/1" },
@@ -304,9 +306,6 @@
   });
   fill_random("consolation");
   fill_random("starter");
-  $(function () {
-    $('[data-toggle="tooltip"]').tooltip();
-  });
   $("#timepicker").timepicker({
     timeFormat: "H:i",
   });

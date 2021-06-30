@@ -92,9 +92,33 @@ class Entry
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute([$datelimit->format('Y-m-d')]);
-      $result = $stmt->fetchAll()[0];
-      $result["starter"] = explode(",", $result["starter"]);
-      $result["consolation"] = explode(",", $result["consolation"]);
+      $result = $stmt->fetchAll();
+      if (!empty($result)) {
+        $result = $result[0];
+        $result["starter"] = explode(",", $result["starter"]);
+        $result["consolation"] = explode(",", $result["consolation"]);
+      }
+    } catch (\PDOException $e) {
+      $result = null;
+    }
+    return array("data" => $result);
+  }
+
+
+  public function get_yesterday_result()
+  {
+    $datelimit = get_valid_date($this->db);
+    $datelimit->modify("-1 day");
+    $query = 'SELECT * FROM entry WHERE day == ? ORDER BY day DESC LIMIT 1';
+    try {
+      $stmt = $this->db->prepare($query);
+      $stmt->execute([$datelimit->format('Y-m-d')]);
+      $result = $stmt->fetchAll();
+      if (!empty($result)) {
+        $result = $result[0];
+        $result["starter"] = explode(",", $result["starter"]);
+        $result["consolation"] = explode(",", $result["consolation"]);
+      }
     } catch (\PDOException $e) {
       $result = null;
     }
