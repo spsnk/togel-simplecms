@@ -96,8 +96,8 @@
   };
 
   let live_draw_timer = null;
-  const API_URL = "https://pridosandbox.com/api";
-  // const API_URL = "../api";
+  // const API_URL = "https://pridosandbox.com/api";
+  const API_URL = "../api";
   const load_data = (cache = true) => {
     let cache_string = "";
     if (cache) {
