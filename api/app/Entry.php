@@ -117,7 +117,8 @@ class Entry
   public function get_yesterday_result()
   {
     $datelimit = get_valid_date($this->db);
-    $query = 'SELECT * FROM entry WHERE day < ? ORDER BY day DESC LIMIT 1';
+    $datelimit->modify("-1 day");
+    $query = 'SELECT * FROM entry WHERE day <= ? ORDER BY day DESC LIMIT 1';
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute([$datelimit->format('Y-m-d')]);
