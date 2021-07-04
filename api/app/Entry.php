@@ -117,14 +117,13 @@ class Entry
   public function get_yesterday_result()
   {
     $datelimit = get_valid_date($this->db);
-    $datelimit->modify("-1 day");
-    $query = 'SELECT * FROM entry WHERE day <= ? ORDER BY day DESC LIMIT 1';
+    $query = 'SELECT * FROM entry WHERE day <= ? ORDER BY day DESC LIMIT 2';
     try {
       $stmt = $this->db->prepare($query);
       $stmt->execute([$datelimit->format('Y-m-d')]);
       $result = $stmt->fetchAll();
-      if (!empty($result)) {
-        $result = $result[0];
+      if (!empty($result) && !empty($result[1])) {
+        $result = $result[1];
         $timezone = new DateTimeZone('+0700');
         $day = new DateTime($result["day"], $timezone);
         $result["day"] = $day->format(DateTime::ISO8601);
